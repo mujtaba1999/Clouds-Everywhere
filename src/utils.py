@@ -19,7 +19,10 @@ def fetch_all(url, payload, retries=3, backoff=2, timeout=30):
     """Collect every feature across all pages of a STAC search.
 
     The Element84 STAC API caps responses at 100 items per page and signals
-    the next page via a ``links[rel=next].body`` object that is POSTed as-is.
+    the next page via a ``links[rel=next].body`` object containing a ``next``
+    cursor token.  Crucially, that body omits any ``filter`` / ``filter-lang``
+    fields from the original request, so we must NOT replace the payload
+    wholesale — we only inject the cursor token into the original payload.
     """
     features = []
     current_payload = payload.copy()
@@ -34,5 +37,7 @@ def fetch_all(url, payload, retries=3, backoff=2, timeout=30):
         )
         if not next_link or not page:
             break
-        current_payload = next_link["body"]   # cursor already embedded by the API
+        # Only carry the cursor forward — keep the original filter intact.
+        cursor = next_link["body"].get("next")
+        current_payload = {**payload, "next": cursor}
     return features

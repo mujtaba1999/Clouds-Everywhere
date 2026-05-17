@@ -12,20 +12,18 @@ def search(bbox, start_date, end_date, max_cloud):
         "collections": ["landsat-c2-l2"],
         "bbox": bbox,
         "datetime": f"{start_date}T00:00:00Z/{end_date}T23:59:59Z",
-        "filter-lang": "cql2-json",
-        "filter": {
-            "op": "<=",
-            "args": [{"property": "eo:cloud_cover"}, max_cloud]
-        },
-        "limit": 100
+        "limit": 100,
     }
     results = []
     for item in fetch_all(URL, payload):
         p = item["properties"]
+        cloud = p.get("eo:cloud_cover", -1)
+        if cloud != -1 and cloud > max_cloud:
+            continue
         results.append(SatelliteImage(
             id            = item["id"],
             date          = p.get("datetime", "")[:10],
-            cloud_cover   = p.get("eo:cloud_cover", -1),
+            cloud_cover   = cloud,
             satellite     = p.get("platform", "Landsat"),
             thumbnail_url = item["assets"].get("thumbnail", {}).get("href", "")
         ))
