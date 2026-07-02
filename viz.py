@@ -240,6 +240,91 @@ def plot_cloud_timeline(coverage_results, max_cloud=20, satellite="Sentinel-2"):
     return fig
 
 
+# ── 4. Availability calendar strip (from a QueryReport) ───────────────────────
+
+def plot_availability_calendar(report, satellite=None):
+    """
+    Friendly calendar-style strip built from a QueryReport.
+
+    Each cell is one period (day/week/month), coloured:
+        green  → available (all tiles covered)
+        amber  → gap       (some tiles missing)
+        red    → missing   (no usable imagery)
+
+    A number in each cell shows how many tiles are covered out of the total.
+    """
+    sats = [satellite] if satellite else report.satellites
+    by_sat = report.by_satellite()
+    sats = [s for s in by_sat if (satellite is None or s == satellite)]
+    if not sats:
+        print("No data to plot.")
+        return None
+
+    status_val = {"available": 2, "gap": 1, "missing": 0}
+    colors     = [_MISSING, _PARTIAL, _FULL]
+    cmap       = mcolors.ListedColormap(colors)
+    norm       = mcolors.BoundaryNorm([0, 1, 2, 3], 3)
+
+    # align all satellites on the same period columns (by start date)
+    all_periods = sorted({p.period_start: p.label
+                          for p in report.periods}.items())
+    starts  = [s for s, _ in all_periods]
+    labels  = [l for _, l in all_periods]
+    n_cols  = len(starts)
+    n_rows  = len(sats)
+
+    grid = np.full((n_rows, n_cols), np.nan)
+    text = [["" for _ in range(n_cols)] for _ in range(n_rows)]
+    for r, sat in enumerate(sats):
+        pmap = {p.period_start: p for p in by_sat[sat]}
+        for c, start in enumerate(starts):
+            p = pmap.get(start)
+            if p is not None:
+                grid[r, c] = status_val[p.status]
+                text[r][c] = f"{p.n_covered}/{p.n_required}"
+
+    with plt.rc_context(_STYLE):
+        fig_w = max(9, n_cols * 1.05 + 3)
+        fig_h = max(2.4, n_rows * 0.9 + 1.8)
+        fig, ax = plt.subplots(figsize=(fig_w, fig_h))
+
+        ax.imshow(grid, aspect="auto", cmap=cmap, norm=norm)
+
+        for r in range(n_rows):
+            for c in range(n_cols):
+                if not np.isnan(grid[r, c]):
+                    ax.text(c, r, text[r][c], ha="center", va="center",
+                            fontsize=8, fontweight="bold", color="white")
+
+        ax.set_xticks(range(n_cols))
+        ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=8)
+        ax.set_yticks(range(n_rows))
+        ax.set_yticklabels(sats, fontsize=9.5)
+        ax.set_xticks(np.arange(-.5, n_cols, 1), minor=True)
+        ax.set_yticks(np.arange(-.5, n_rows, 1), minor=True)
+        ax.grid(which="minor", color="white", linewidth=2)
+        ax.tick_params(which="minor", length=0)
+
+        patches = [
+            mpatches.Patch(facecolor=_FULL,    label="Available - all tiles covered"),
+            mpatches.Patch(facecolor=_PARTIAL, label="Gap - some tiles missing"),
+            mpatches.Patch(facecolor=_MISSING, label="Missing - no usable imagery"),
+        ]
+        ax.legend(handles=patches, loc="upper center",
+                  bbox_to_anchor=(0.5, -0.28 - 0.04 * n_rows),
+                  ncol=3, fontsize=8.5, framealpha=0, handlelength=1.3)
+
+        unit = report.group_by
+        fig.suptitle(
+            f"Data availability by {unit}  ·  "
+            f"{report.start_date} → {report.end_date}  ·  ≤{report.max_cloud:.0f}% cloud",
+            fontsize=11, fontweight="bold",
+        )
+        fig.tight_layout()
+
+    return fig
+
+
 # ── 3. Satellite comparison bar chart ─────────────────────────────────────────
 
 def plot_satellite_comparison(coverage_results, max_cloud=20):
