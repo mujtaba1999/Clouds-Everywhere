@@ -3,12 +3,14 @@ from collections import defaultdict
 try:
     from src import sentinel2, landsat
     from models import DateCoverage
+    from aoi import to_bbox
 except ImportError:
     from .src import sentinel2, landsat
     from .models import DateCoverage
+    from .aoi import to_bbox
 
 
-def check_coverage(bbox, start_date, end_date, max_cloud=20, satellites=("sentinel2", "landsat")):
+def check_coverage(aoi, start_date, end_date, max_cloud=20, satellites=("sentinel2", "landsat")):
     """
     For each date in the range, determine whether all tiles covering the bbox
     are available and below the cloud threshold.
@@ -18,6 +20,8 @@ def check_coverage(bbox, start_date, end_date, max_cloud=20, satellites=("sentin
       "partial" — some tiles pass, some are missing or too cloudy
       "missing" — no tiles pass at all for that date
     """
+    bbox = to_bbox(aoi)
+
     fetchers = []
     if "sentinel2" in satellites:
         fetchers.append(sentinel2.search_tiles)
