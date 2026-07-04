@@ -20,7 +20,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["jupyter"]
+dev = ["jupyter", "pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --import-mode=importlib"
 
 [tool.setuptools.packages.find]
 where = ["."]

@@ -24,13 +24,17 @@ def check_coverage(aoi, start_date, end_date, max_cloud=20, satellites=("sentine
 
     fetchers = []
     if "sentinel2" in satellites:
-        fetchers.append(sentinel2.search_tiles)
+        fetchers.append(("sentinel2", sentinel2.search_tiles))
     if "landsat" in satellites:
-        fetchers.append(landsat.search_tiles)
+        fetchers.append(("landsat", landsat.search_tiles))
 
+    # One satellite failing (API down, no passes) must not abort coverage.
     all_tile_results = []
-    for fetch in fetchers:
-        all_tile_results += fetch(bbox, start_date, end_date)
+    for name, fetch in fetchers:
+        try:
+            all_tile_results += fetch(bbox, start_date, end_date)
+        except Exception as e:
+            print(f"[coverage] '{name}' unavailable for this request — skipping ({e})")
 
     if not all_tile_results:
         return []

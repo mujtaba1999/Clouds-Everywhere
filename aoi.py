@@ -47,6 +47,10 @@ def _parse(aoi):
     if isinstance(aoi, (str, Path)):
         return _from_file(Path(aoi))
 
+    # empty containers are never a valid AOI
+    if isinstance(aoi, (list, tuple)) and len(aoi) == 0:
+        raise ValueError("AOI is empty - provide a bbox, polygon coords, or GeoJSON")
+
     # plain bbox [minX, minY, maxX, maxY]
     if (isinstance(aoi, (list, tuple))
             and len(aoi) == 4
@@ -56,6 +60,10 @@ def _parse(aoi):
     # polygon as list of coordinate pairs [[x, y], ...]
     if (isinstance(aoi, (list, tuple))
             and all(isinstance(v, (list, tuple)) and len(v) == 2 for v in aoi)):
+        if len(aoi) < 3:
+            raise ValueError(
+                f"Polygon needs at least 3 coordinate pairs, got {len(aoi)}"
+            )
         return _coords_to_polygon(aoi), None
 
     # GeoJSON dict
@@ -143,6 +151,8 @@ def _ensure_wgs84(geom, crs):
 
 def _validate_wgs84_bbox(bounds):
     minx, miny, maxx, maxy = bounds
+    if any(v != v for v in bounds):        # NaN check (NaN != NaN)
+        raise ValueError("AOI produced an empty or invalid geometry")
     if not (-180 <= minx <= 180 and -180 <= maxx <= 180):
         raise ValueError(f"Longitude out of WGS84 range: minX={minx}, maxX={maxx}")
     if not (-90 <= miny <= 90 and -90 <= maxy <= 90):

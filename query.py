@@ -59,12 +59,18 @@ def query(aoi, start_date, end_date, max_cloud=20, group_by="week",
     bbox = to_bbox(aoi)
 
     # ── fetch every tile in range (no cloud filter — we bucket ourselves) ────
+    # A single satellite being down or returning nothing must not abort the
+    # whole query — we skip it and carry on with the others.
     all_tiles = []
     for sat in satellites:
         fetch = _FETCHERS.get(sat)
         if fetch is None:
+            print(f"[query] Unknown satellite '{sat}' — skipping")
             continue
-        all_tiles += fetch(bbox, start_date, end_date)
+        try:
+            all_tiles += fetch(bbox, start_date, end_date)
+        except Exception as e:
+            print(f"[query] '{sat}' unavailable for this request — skipping ({e})")
 
     periods = []
     by_sat = defaultdict(list)

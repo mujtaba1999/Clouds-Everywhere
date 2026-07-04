@@ -21,13 +21,19 @@ def search_images(aoi, start_date, end_date, max_cloud=20, satellites=["sentinel
     bbox = to_bbox(aoi)
     results = []
 
-    if "sentinel2" in satellites:
-        results += sentinel2.search(bbox, start_date, end_date, max_cloud)
-
-    if "landsat" in satellites:
-        results += landsat.search(bbox, start_date, end_date, max_cloud)
-
-    if "modis" in satellites:
-        results += modis.search(bbox, start_date, end_date, max_cloud)
+    # Each satellite is fetched independently — one being down or empty must
+    # not abort the whole search.
+    providers = [
+        ("sentinel2", sentinel2.search),
+        ("landsat",   landsat.search),
+        ("modis",     modis.search),
+    ]
+    for name, fetch in providers:
+        if name not in satellites:
+            continue
+        try:
+            results += fetch(bbox, start_date, end_date, max_cloud)
+        except Exception as e:
+            print(f"[search] '{name}' unavailable for this request — skipping ({e})")
 
     return sorted(results, key=lambda x: x.date)
