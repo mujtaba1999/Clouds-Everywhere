@@ -4,6 +4,12 @@
 
 # Clouds-Everywhere
 
+<p align="center">
+  <a href="https://pypi.org/project/clouds-everywhere/"><img src="https://img.shields.io/pypi/v/clouds-everywhere.svg" alt="PyPI version"></a>
+  <a href="https://pypi.org/project/clouds-everywhere/"><img src="https://img.shields.io/pypi/pyversions/clouds-everywhere.svg" alt="Python versions"></a>
+  <a href="https://github.com/mohammadanwarx/Clouds-Everywhere/blob/main/LICENSE"><img src="https://img.shields.io/pypi/l/clouds-everywhere.svg" alt="License"></a>
+</p>
+
 Find out when cloud-free satellite imagery is available over your study area —
 and where the data gaps are.
 
