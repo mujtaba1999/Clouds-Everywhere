@@ -18,7 +18,7 @@ language: which days, weeks, or months have usable imagery, and which tiles
 are missing.
 
 ## Install
-
+https://pypi.org/project/clouds-everywhere/
 ```bash
 pip install clouds-everywhere
 ```
