@@ -4,11 +4,15 @@ Tests for query() — grouping, status classification, and resilience.
 All network access is mocked: we patch query._FETCHERS with functions that
 return synthetic TileResult lists, so these tests are fast and deterministic.
 """
+import importlib
+
 import pytest
 
-import query as query_mod
-from query import query
-from models import TileResult, QueryReport
+# NB: "clouds_everywhere.query" the *module* is shadowed by the query()
+# *function* re-exported in the package __init__, so fetch it via importlib.
+query_mod = importlib.import_module("clouds_everywhere.query")
+query = query_mod.query
+from clouds_everywhere.models import TileResult, QueryReport
 
 
 # ── helpers ───────────────────────────────────────────────────────────────────

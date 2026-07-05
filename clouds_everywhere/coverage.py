@@ -1,13 +1,8 @@
 from collections import defaultdict
 
-try:
-    from src import sentinel2, landsat
-    from models import DateCoverage
-    from aoi import to_bbox
-except ImportError:
-    from .src import sentinel2, landsat
-    from .models import DateCoverage
-    from .aoi import to_bbox
+from .providers import sentinel2, landsat
+from .models import DateCoverage
+from .aoi import to_bbox
 
 
 def check_coverage(aoi, start_date, end_date, max_cloud=20, satellites=("sentinel2", "landsat")):

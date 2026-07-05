@@ -1,9 +1,5 @@
-try:
-    from models import SatelliteImage, TileResult
-    from src.utils import fetch_all
-except ImportError:
-    from ..models import SatelliteImage, TileResult
-    from .utils import fetch_all
+from ..models import SatelliteImage, TileResult
+from .utils import fetch_all
 
 URL = "https://earth-search.aws.element84.com/v1/search"
 

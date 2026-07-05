@@ -1,9 +1,5 @@
-try:
-    from src import sentinel2, landsat, modis        # notebook / script context
-    from aoi import to_bbox
-except ImportError:
-    from .src import sentinel2, landsat, modis       # installed package context
-    from .aoi import to_bbox
+from .providers import sentinel2, landsat, modis
+from .aoi import to_bbox
 
 def search_images(aoi, start_date, end_date, max_cloud=20, satellites=["sentinel2", "landsat", "modis"]):
     """

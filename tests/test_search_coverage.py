@@ -1,9 +1,9 @@
 """Resilience tests for search_images() and check_coverage() when a satellite fails."""
 import pytest
 
-import search as search_mod
-import coverage as coverage_mod
-from models import SatelliteImage, TileResult
+import clouds_everywhere.search as search_mod
+import clouds_everywhere.coverage as coverage_mod
+from clouds_everywhere.models import SatelliteImage, TileResult
 
 AOI = [-4.5, 39.5, -2.5, 41.0]
 

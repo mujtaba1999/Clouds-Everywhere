@@ -20,14 +20,9 @@ from collections import defaultdict
 
 import pandas as pd
 
-try:
-    from src import sentinel2, landsat
-    from models import TilePeriodStat, PeriodCoverage, QueryReport
-    from aoi import to_bbox
-except ImportError:
-    from .src import sentinel2, landsat
-    from .models import TilePeriodStat, PeriodCoverage, QueryReport
-    from .aoi import to_bbox
+from .providers import sentinel2, landsat
+from .models import TilePeriodStat, PeriodCoverage, QueryReport
+from .aoi import to_bbox
 
 
 _FETCHERS = {

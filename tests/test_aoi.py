@@ -1,7 +1,7 @@
 """Tests for aoi.to_bbox — AOI normalization and error handling."""
 import pytest
 
-from aoi import to_bbox
+from clouds_everywhere.aoi import to_bbox
 
 
 # ── valid inputs — all should give the same WGS84 bbox ────────────────────────

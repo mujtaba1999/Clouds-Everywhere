@@ -1,35 +1,45 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mohammadanwarx/Clouds-Everywhere/main/assets/logo.png" alt="Clouds-Everywhere logo" width="260">
+</p>
+
 # Clouds-Everywhere
 
-Check whether usable satellite imagery is available over your area of interest —
-filtered by cloud cover, grouped by day, week, or month.
+Find out when cloud-free satellite imagery is available over your study area —
+and where the data gaps are.
 
-Point it at a region and a time window and it tells you, in plain language,
-**when clean imagery exists and where the data gaps are.**
+You give it an area, a date range, and a cloud limit. It answers in plain
+language: which days, weeks, or months have usable imagery, and which tiles
+are missing.
 
 ## Install
 
 ```bash
-pip install -e .
+pip install clouds-everywhere
 ```
 
-Depends on `requests`, `pandas`, `matplotlib`, `seaborn`, `folium`,
-`geopandas`, and `pyproj`.
+Or from source:
+
+```bash
+git clone https://github.com/mohammadanwarx/Clouds-Everywhere.git
+cd Clouds-Everywhere
+pip install -e .
+```
 
 ## Quick start
 
 ```python
-from query import query
+from clouds_everywhere import query
 
 report = query(
     aoi        = "my_area.geojson",   # bbox, polygon, GeoJSON, or shapefile
     start_date = "2024-01-01",
     end_date   = "2024-02-29",
-    max_cloud  = 20,                  # % cloud threshold
-    group_by   = "week",             # "day" | "week" | "month"
+    max_cloud  = 20,                  # max cloud cover in %
+    group_by   = "week",              # "day" | "week" | "month"
     satellites = ["sentinel2", "landsat"],
 )
 
-print(report)   # friendly, plain-language summary
+print(report)
 ```
 
 ```
@@ -41,52 +51,58 @@ print(report)   # friendly, plain-language summary
     Summary: 3 fully-covered weeks, 5 with gaps, 1 empty  (of 9 weeks)
 ```
 
-Each period is flagged as:
+Each period gets one of three statuses:
 
 | Status | Meaning |
 |---|---|
-| **available** | every tile covering the AOI has ≥1 usable image |
-| **gap** | some tiles are covered but at least one is a hole |
-| **missing** | no tile has any usable imagery |
+| **available** | every tile has at least one usable image |
+| **gap** | some tiles have imagery, but at least one is missing |
+| **missing** | no usable imagery at all |
 
-*Usable* = cloud cover at or below your threshold.
+*Usable* means cloud cover is at or below your threshold.
 
-## Any AOI format
+## Your area, any format
 
-`to_bbox()` (called automatically inside `query`) accepts and reprojects to WGS84:
+The AOI can be any of these — the CRS is handled for you (everything is
+reprojected to WGS84 automatically):
 
-- plain bbox `[minX, minY, maxX, maxY]`
-- polygon coordinate ring `[[lon, lat], ...]`
-- GeoJSON dict (`Feature`, `FeatureCollection`, or geometry)
-- file path: `.geojson`, `.json`, `.shp`, `.zip` (zipped shapefile)
+- a bbox: `[minX, minY, maxX, maxY]`
+- polygon coordinates: `[[lon, lat], ...]`
+- a GeoJSON dict (`Feature`, `FeatureCollection`, or geometry)
+- a file: `.geojson`, `.json`, `.shp`, or `.zip` (zipped shapefile)
 
-Non-WGS84 CRS are reprojected with `pyproj`, so you never worry about the
-coordinate reference system.
-
-## Structured output & plots
+## Tables and plots
 
 ```python
-report.to_dataframe()      # one row per period × satellite
-report.tile_dataframe()    # one row per period × satellite × tile
-report.available_periods() # list of fully-covered periods
-report.gap_periods()       # periods with holes
+report.to_dataframe()        # one row per period per satellite
+report.tile_dataframe()      # one row per tile per period
+report.available_periods()   # fully covered periods
+report.gap_periods()         # periods with holes
 
-from viz import plot_availability_calendar
-plot_availability_calendar(report)   # green / amber / red calendar strip
+from clouds_everywhere.viz import plot_availability_calendar
+plot_availability_calendar(report)   # green / amber / red calendar
 ```
 
-## Lower-level API
+## Lower-level functions
 
-- `search_images(aoi, start, end, max_cloud, satellites)` — flat list of scenes
-- `check_coverage(aoi, start, end, max_cloud, satellites)` — per-date tile coverage
+- `search_images(...)` — flat list of matching scenes
+- `check_coverage(...)` — tile coverage per date
 - `viz.plot_coverage_heatmap`, `plot_cloud_timeline`, `plot_satellite_comparison`
 
-## Notebooks
+## Demos
 
-- [`demo.ipynb`](demo.ipynb) — basic search & coverage walkthrough
-- [`demo2.ipynb`](demo2.ipynb) — the `query()` workflow plus expert views
+- [`demo.ipynb`](demo.ipynb) — search and coverage basics
+- [`demo2.ipynb`](demo2.ipynb) — the `query()` workflow and all plots
+
+## Tests
+
+```bash
+pytest
+```
+
+Fast and offline — all API calls are mocked.
 
 ## Data sources
 
-Sentinel-2 and Landsat via the [Element84 Earth Search](https://earth-search.aws.element84.com)
-STAC API; MODIS via NASA CMR STAC.
+Sentinel-2 and Landsat from the [Element84 Earth Search](https://earth-search.aws.element84.com)
+STAC API. MODIS from NASA CMR STAC.

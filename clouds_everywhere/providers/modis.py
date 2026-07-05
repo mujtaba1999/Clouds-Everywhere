@@ -1,8 +1,5 @@
 import requests
-try:
-    from models import SatelliteImage
-except ImportError:
-    from ..models import SatelliteImage
+from ..models import SatelliteImage
 
 # NASA CMR STAC — LP DAAC hosts MODIS land surface products
 URL = "https://cmr.earthdata.nasa.gov/stac/LPDAAC_ECS/search"
