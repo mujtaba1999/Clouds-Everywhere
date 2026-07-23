@@ -42,7 +42,7 @@ report = query(
     end_date   = "2024-02-29",
     max_cloud  = 20,                  # max cloud cover in %
     group_by   = "week",              # "day" | "week" | "month"
-    satellites = ["sentinel2", "landsat"],
+    satellites = ["sentinel2", "landsat", "sentinel3"],
 )
 
 print(report)
@@ -111,4 +111,9 @@ Fast and offline — all API calls are mocked.
 ## Data sources
 
 Sentinel-2 and Landsat from the [Element84 Earth Search](https://earth-search.aws.element84.com)
-STAC API. MODIS from NASA CMR STAC.
+STAC API. MODIS from NASA CMR STAC. Sentinel-3 (OLCI Land Full Resolution) from the
+[Copernicus Data Space Ecosystem](https://dataspace.copernicus.eu) STAC API.
+
+Note: Sentinel-3's OLCI swath is ~1270 km wide — far larger than a typical study
+area — so unlike Sentinel-2/Landsat there's no tile grid to speak of; any pass
+that intersects your AOI already covers it in full.

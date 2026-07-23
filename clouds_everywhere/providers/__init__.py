@@ -1,1 +1,1 @@
-from . import sentinel2, landsat, modis
+from . import sentinel2, landsat, modis, sentinel3

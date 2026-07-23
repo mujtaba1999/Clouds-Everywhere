@@ -20,7 +20,7 @@ from collections import defaultdict
 
 import pandas as pd
 
-from .providers import sentinel2, landsat
+from .providers import sentinel2, landsat, sentinel3
 from .models import TilePeriodStat, PeriodCoverage, QueryReport
 from .aoi import to_bbox
 
@@ -28,6 +28,7 @@ from .aoi import to_bbox
 _FETCHERS = {
     "sentinel2": sentinel2.search_tiles,
     "landsat":   landsat.search_tiles,
+    "sentinel3": sentinel3.search_tiles,
 }
 
 
@@ -41,7 +42,7 @@ def query(aoi, start_date, end_date, max_cloud=20, group_by="week",
     end_date    : "YYYY-MM-DD"
     max_cloud   : cloud-cover threshold in percent (default 20)
     group_by    : "day" | "week" | "month"  (default "week")
-    satellites  : subset of ("sentinel2", "landsat")
+    satellites  : subset of ("sentinel2", "landsat", "sentinel3")
 
     Returns
     -------

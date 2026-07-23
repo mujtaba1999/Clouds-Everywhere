@@ -1,4 +1,4 @@
-from .providers import sentinel2, landsat, modis
+from .providers import sentinel2, landsat, modis, sentinel3
 from .aoi import to_bbox
 
 def search_images(aoi, start_date, end_date, max_cloud=20, satellites=["sentinel2", "landsat", "modis"]):
@@ -12,7 +12,7 @@ def search_images(aoi, start_date, end_date, max_cloud=20, satellites=["sentinel
     start_date  : "YYYY-MM-DD"
     end_date    : "YYYY-MM-DD"
     max_cloud   : 0-100 (default 20%)
-    satellites  : ["sentinel2", "landsat", "modis"] or a subset
+    satellites  : ["sentinel2", "landsat", "modis", "sentinel3"] or a subset
     """
     bbox = to_bbox(aoi)
     results = []
@@ -23,6 +23,7 @@ def search_images(aoi, start_date, end_date, max_cloud=20, satellites=["sentinel
         ("sentinel2", sentinel2.search),
         ("landsat",   landsat.search),
         ("modis",     modis.search),
+        ("sentinel3", sentinel3.search),
     ]
     for name, fetch in providers:
         if name not in satellites:
